@@ -6,13 +6,23 @@ from PIL import Image
 import time
 
 import tensorflow as tf 
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from io import StringIO
 
-from assets.module import LSTM_PP_test as LSTM_PP
+from assets.module import LSTM_PP
 from assets.module import WangChan_PP
 
 #set up 
+@st.cache(allow_output_mutation=True,show_spinner=False)
+def load_model_lstm(): 
+    lstm_model = LSTM_PP.load_LSTM()
+    return lstm_model
+
+@st.cache(allow_output_mutation=True,show_spinner=False)
+def load_model_wangchan(): 
+    wangchan_model = WangChan_PP.load_wangchan()
+    return wangchan_model
 
 placeholder = "กระหัง หรืออีกชื่อหนึ่งเรียกว่า กระหาง เป็นผีตามความเชื่อของคนไทย เป็นผีผู้ชาย คู่กับผีกระสือ ซึ่งเป็นผู้หญิง เชื่อกันว่าผู้ที่เป็นผีกระหังนั้น จะเป็นผู้ที่เล่นไสยศาสตร์ เมื่ออาคมแกร่งกล้าไม่สามารถควบคุมได้ก็จะเข้าตัว"
 
@@ -75,7 +85,7 @@ with left_col:
                     "เลือกช่องทางการรับข้อความ📤",
                     ("พิมพ์ข้อความ","อัพโหลดไฟล์ .txt"))
 
-    st.info(f'🔸สถานะ: คุณได้เลือก {input_option}')
+    st.info(f'🔹สถานะ: คุณได้เลือก {input_option}')
 
     if input_option == "พิมพ์ข้อความ":
         input_text = st.text_area("กรอกข้อความ⌨️",
@@ -126,32 +136,34 @@ with left_col:
 with right_col: 
     st.subheader("ผลลัพธ์การประมวลผล 👩🏻‍💻")
     if button and isDataComplete:
-        isLoadModel = False
         
-        if LSTM_PP.is_LSTM_ready() == False or WangChan_PP.is_model_ready() == False:
-            with st.spinner(text='กำลังจัดเตรียมแบบจำลอง⌛️\n(โหลดเพียงครั้งแรก)'):
-                isLoadModel = True
-                progress_bar = st.progress(0)
-                started_load_time = time.time()
-               
-                LSTM_PP.load_LSTM()
-                progress_bar.progress(50)
 
-                WangChan_PP.load_wangchan()
-                progress_bar.progress(100)
-    
-        if isLoadModel:
-            finished_load_time = time.time()
-            loadModelTime = finished_load_time - started_load_time
-            st.info("จัดเตรียมแบบจำลอง✅ (เวลาที่ใช้ {:.2f} วินาที)".format(loadModelTime))
+        started_load_time = time.time()
+        
+        with st.spinner(text='กำลังจัดเตรียมแบบจำลอง⌛️ (อาจใช้เวลาในครั้งแรก)'):
+            progress_bar = st.progress(0)
+            lstm_model = load_model_lstm()
+            progress_bar.progress(30)
+            wangchan_model = load_model_wangchan()
+            progress_bar.progress(60)
+            if WangChan_PP.is_tokenizer_ready() == False:
+                WangChan_PP.load_wangchan_tokenizer()
+            progress_bar.progress(100)
+
+        finished_load_time = time.time()
+        loadModelTime = finished_load_time - started_load_time
+        st.info("จัดเตรียมแบบจำลอง✅ (เวลาที่ใช้ {:.2f} วินาที)".format(loadModelTime))
+
 
         with st.spinner(text='กำลังประมวลผล⌛️'):
+            
+
             started_time = time.time()
             if selected_model == "Long short-term memory (LSTM)":
-                domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text[:1500])
+                domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text[:1500],lstm_model)
                 predicted_domain = DOMAIN_LIST[domainIndex]
             else:
-                domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text[:1500])
+                domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text[:1500],wangchan_model)
                 predicted_domain = DOMAIN_LIST[domainIndex]
 
             finished_time = time.time()
@@ -170,4 +182,4 @@ with right_col:
             placeholder = input_text
             
     else:
-        st.write("ยังไม่ได้เริ่มต้นการประมวลผล")
+        st.write("กรุณาปรับแต่งข้อมูลนำเข้าเพื่อประมวลผล")

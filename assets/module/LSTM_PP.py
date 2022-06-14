@@ -8,8 +8,9 @@ from sklearn import preprocessing
 import tensorflow as tf 
 
 def load_LSTM():
-    global LSTM_MODEL
+    # global LSTM_MODEL
     LSTM_MODEL = tf.keras.models.load_model("assets/model/LSTM2500")
+    return LSTM_MODEL 
 
 
 def replace_url(text):
@@ -44,27 +45,20 @@ DOMAIN_DICT = {
       7 : 'Belief & Thought'
   }
 
-def all_preprocessing(input_text):
+def all_preprocessing(input_text,model):
     text = ""
     for word in process_text(input_text):
       text = text + word + " "
     text = [text]
     #PATH = ""
     #model = tf.keras.models.load_model(PATH)
-    pred = LSTM_MODEL.predict(np.array(text))
+    pred = model.predict(np.array(text))
 
     domainProb = max(list(pred[0]))
     domainIndex = np.argmax(pred, axis=1)[0]
     return domainIndex,domainProb
 
-def is_LSTM_ready():
-    try:
-        all_preprocessing("สวัสดี")
-        return True
-    except:
-        return False
 
-    
 
     
     
