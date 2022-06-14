@@ -1,3 +1,4 @@
+from cgi import test
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +7,9 @@ import time
 
 import tensorflow as tf 
 
-from assets.module import LSTM_PP
+from io import StringIO
+
+from assets.module import LSTM_PP_test as LSTM_PP
 from assets.module import WangChan_PP
 
 #set up 
@@ -85,7 +88,7 @@ with left_col:
         if uploaded_file != None:
             if uploaded_file.type == "text/plain":
                 #st.write("yeh it's text file!")
-                
+
                 stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
                 input_text = stringio.read()
 
