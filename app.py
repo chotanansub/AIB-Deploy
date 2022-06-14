@@ -12,8 +12,8 @@ from assets.module import LSTM_PP
 
 
 
-AIBlogo_image = Image.open('assets\img\AIBlogo.png')
-book_image = Image.open('assets\img\\book.jpg')
+AIBlogo_image = Image.open('assets/img/AIBlogo.png')
+book_image = Image.open('assets/img/book.jpg')
 
 DOMAIN_LIST = ['วิทยาศาสตร์ประยุกต์🔬',
                'ศิลปกรรม🖌️',
@@ -36,9 +36,9 @@ with st.sidebar:
 
 
 st.header('ระบบจำแนกแวดวงบทความภาษาไทย📙')
-with open("assets\webfonts\\font.txt") as f:
+with open("assets/webfonts/font.txt") as f:
     st.markdown(f.read(),unsafe_allow_html=True)
-with open("assets\css\style.css") as f:
+with open("assets/css/style.css") as f:
     st.markdown(f"<style> {f.read()} </style>",unsafe_allow_html=True)
 hide_table_index = """
             <style>         
@@ -124,7 +124,7 @@ with right_col:
             time.sleep(3)
 
             if selected_model == "Long short-term memory (LSTM)":
-                LSTM_MODEL = tf.keras.models.load_model("assets\model\LSTM2500")
+                LSTM_MODEL = tf.keras.models.load_model("assets/model/LSTM2500")
                 domainIndex = LSTM_PP.all_preprocessing(input_text,LSTM_MODEL)
                 predicted_domain = DOMAIN_LIST[domainIndex]
             else:
