@@ -9,7 +9,7 @@ import tensorflow as tf
 
 def load_LSTM():
     global LSTM_MODEL
-    LSTM_MODEL = tf.keras.models.load_model("assets/model/LSTM5000")
+    LSTM_MODEL = tf.keras.models.load_model("assets/model/LSTM2500")
 
 
 def replace_url(text):
