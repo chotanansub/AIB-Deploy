@@ -84,7 +84,7 @@ with left_col:
         uploaded_file = st.file_uploader("อัพโหลดไฟล์ (นามสกุล txt.)")
         if uploaded_file != None:
             if uploaded_file.type == "text/plain":
-                st.write("yeh it's text file!")
+                #st.write("yeh it's text file!")
 
                 with open(uploaded_file) as f:
                     input_text = f.read()
