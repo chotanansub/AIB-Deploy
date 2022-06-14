@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 import time
+from io import StringIO 
+ 
 
 import tensorflow as tf 
 
@@ -85,9 +87,9 @@ with left_col:
         if uploaded_file != None:
             if uploaded_file.type == "text/plain":
                 #st.write("yeh it's text file!")
+                stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+                input_text = stringio.read()
 
-                with open(uploaded_file) as f:
-                    input_text = f.read()
 
             # elif uploaded_file.type == "text/csv":
             #     st.write("boom it's csv!") 
