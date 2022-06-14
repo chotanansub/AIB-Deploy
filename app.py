@@ -7,10 +7,11 @@ import time
 import tensorflow as tf 
 
 from assets.module import LSTM_PP
+from assets.module import WangChan_PP
 
+#set up 
 
-
-
+placeholder = "กระหัง หรืออีกชื่อหนึ่งเรียกว่า กระหาง เป็นผีตามความเชื่อของคนไทย เป็นผีผู้ชาย คู่กับผีกระสือ ซึ่งเป็นผู้หญิง เชื่อกันว่าผู้ที่เป็นผีกระหังนั้น จะเป็นผู้ที่เล่นไสยศาสตร์ เมื่ออาคมแกร่งกล้าไม่สามารถควบคุมได้ก็จะเข้าตัว"
 
 AIBlogo_image = Image.open('assets/img/AIBlogo.png')
 book_image = Image.open('assets/img/book.jpg')
@@ -36,6 +37,8 @@ with st.sidebar:
 
 
 st.header('ระบบจำแนกแวดวงบทความภาษาไทย📙')
+
+
 with open("assets/webfonts/font.txt") as f:
     st.markdown(f.read(),unsafe_allow_html=True)
 with open("assets/css/style.css") as f:
@@ -69,12 +72,12 @@ with left_col:
                     "เลือกช่องทางการรับข้อความ📤",
                     ("พิมพ์ข้อความ","อัพโหลดไฟล์ .txt"))
 
-    st.info(f'สถานะ: คุณได้เลือก {input_option}')
+    st.info(f'🔸สถานะ: คุณได้เลือก {input_option}')
 
     if input_option == "พิมพ์ข้อความ":
         input_text = st.text_area("กรอกข้อความ⌨️",
-                "กระหัง หรืออีกชื่อหนึ่งเรียกว่า กระหาง เป็นผีตามความเชื่อของคนไทย เป็นผีผู้ชาย คู่กับผีกระสือ ซึ่งเป็นผู้หญิง เชื่อกันว่าผู้ที่เป็นผีกระหังนั้น จะเป็นผู้ที่เล่นไสยศาสตร์ เมื่ออาคมแกร่งกล้าไม่สามารถควบคุมได้ก็จะเข้าตัว",
-                max_chars=3000)
+                placeholder,
+                max_chars=2000)
 
     else:
         input_text = None
@@ -98,7 +101,7 @@ with left_col:
         selected_model = "WangChanBERTa"
     else:
         selected_model = "Long short-term memory (LSTM)"
-    st.info(f'คุณได้เลือกแบบจำลอง: {selected_model}')
+    st.info(f'🔹สถานะ: คุณได้เลือกแบบจำลอง: {selected_model}')
 
     #Accept Button
     button = st.button('ตกลง')
@@ -112,30 +115,56 @@ with left_col:
             isDataComplete = True
         if isDataComplete != True:
             st.warning(alert_left)
-        st.info(f"สถานะ: {alert_left}",)
+        st.info(f"🔹สถานะ: {alert_left}",)
 
-        #RUN MODEL HERe
+        placeholder = input_text
 
 
 with right_col: 
     st.subheader("ผลลัพธ์การประมวลผล 👩🏻‍💻")
     if button and isDataComplete:
-        with st.spinner(text='กำลังประมวลผล⌛️'):
-            time.sleep(3)
+        isLoadModel = False
+        
+        if LSTM_PP.is_LSTM_ready() == False or WangChan_PP.is_model_ready() == False:
+            with st.spinner(text='กำลังจัดเตรียมแบบจำลอง⌛️\n(โหลดเพียงครั้งแรก)'):
+                isLoadModel = True
+                progress_bar = st.progress(0)
+                started_load_time = time.time()
+               
+                LSTM_PP.load_LSTM()
+                progress_bar.progress(50)
 
+                WangChan_PP.load_wangchan()
+                progress_bar.progress(100)
+    
+        if isLoadModel:
+            finished_load_time = time.time()
+            loadModelTime = finished_load_time - started_load_time
+            st.info("จัดเตรียมแบบจำลอง✅ (เวลาที่ใช้ {:.2f} วินาที)".format(loadModelTime))
+
+        with st.spinner(text='กำลังประมวลผล⌛️'):
+            started_time = time.time()
             if selected_model == "Long short-term memory (LSTM)":
-                LSTM_MODEL = tf.keras.models.load_model("assets/model/LSTM2500")
-                domainIndex = LSTM_PP.all_preprocessing(input_text,LSTM_MODEL)
+                domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text)
                 predicted_domain = DOMAIN_LIST[domainIndex]
             else:
-                predicted_domain = "ความเชื่อ🙏🏼"
+                domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text)
+                predicted_domain = DOMAIN_LIST[domainIndex]
+
+            finished_time = time.time()
+            processingTime = finished_time - started_time
+
+            st.info("ประมวลผลเสร็จสิ้น✅ (เวลาที่ใช้ {:.2f} วินาที)".format(processingTime))
             lst = [['แบบจำลอง(Model)🤖',selected_model],
+                   ['เวลาที่ใช้ในการประมวลผล⌛️', "{:.2f} วินาที".format(processingTime)],
                    ['ข้อความ📃',input_text],
-                   ['ผลการทำนายแวดวง', predicted_domain]
+                   ['ผลการทำนายแวดวง📌', predicted_domain],
+                   ['ความใกล้เคียง📊', "{:.2f}%".format(domainProb*100)]
                   ]
             vizDF = pd.DataFrame(lst)
             st.table(vizDF)
-
-            #MODEL OUTPUT
+            st.balloons()
+            placeholder = input_text
+            
     else:
         st.write("ยังไม่ได้เริ่มต้นการประมวลผล")
