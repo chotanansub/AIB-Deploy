@@ -79,7 +79,7 @@ with left_col:
     if input_option == "พิมพ์ข้อความ":
         input_text = st.text_area("กรอกข้อความ⌨️",
                 placeholder,
-                max_chars=2000)
+                max_chars=5000)
 
     else:
         input_text = None

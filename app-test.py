@@ -80,7 +80,7 @@ with left_col:
     if input_option == "พิมพ์ข้อความ":
         input_text = st.text_area("กรอกข้อความ⌨️",
                 placeholder,
-                max_chars=2000)
+                max_chars=5000)
 
     else:
         input_text = None
@@ -148,10 +148,10 @@ with right_col:
         with st.spinner(text='กำลังประมวลผล⌛️'):
             started_time = time.time()
             if selected_model == "Long short-term memory (LSTM)":
-                domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text)
+                domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text[:1500])
                 predicted_domain = DOMAIN_LIST[domainIndex]
             else:
-                domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text)
+                domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text[:1500])
                 predicted_domain = DOMAIN_LIST[domainIndex]
 
             finished_time = time.time()
