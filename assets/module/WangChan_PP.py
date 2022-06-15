@@ -8,11 +8,11 @@ def load_wangchan():
     return WANGCHAN_MODEL
     
 def load_wangchan_tokenizer():
-    global TOKENIZER
     TOKENIZER = AutoTokenizer.from_pretrained("CH0KUN/autotrain-TNC_Domain_WangchanBERTa-921730254")
+    return TOKENIZER
 
-def all_preprocessing(text,model):
-    input =  TOKENIZER(text,return_tensors="pt")
+def all_preprocessing(text,model,tokenizer):
+    input =  tokenizer(text,return_tensors="pt")
     outputs =  model(**input)
     output_LST = outputs.logits.softmax(dim=-1).tolist()[0]
     domainProb = max(output_LST) 

@@ -7,22 +7,28 @@ import time
 
 import tensorflow as tf 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import transformers
+
 
 from io import StringIO
 
 from assets.module import LSTM_PP
 from assets.module import WangChan_PP
 
-#set up 
-@st.cache(allow_output_mutation=True,show_spinner=False)
-def load_model_lstm(): 
-    lstm_model = LSTM_PP.load_LSTM()
-    return lstm_model
+#Load Model and Tokenizer 
+@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800)
+def load_model_lstm(): return LSTM_PP.load_LSTM()
 
-@st.cache(allow_output_mutation=True,show_spinner=False)
-def load_model_wangchan(): 
-    wangchan_model = WangChan_PP.load_wangchan()
-    return wangchan_model
+@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800)
+def load_model_wangchan(): return WangChan_PP.load_wangchan()
+
+@st.cache(hash_funcs={transformers.models.gpt2.tokenization_gpt2_fast.GPT2TokenizerFast: hash},
+                    allow_output_mutation=True,
+                    show_spinner=False,
+                    ttl=1800)
+def load_wangchan_tokenizer(): return WangChan_PP.load_wangchan_tokenizer()
+
+#Set up 
 
 placeholder = "กระหัง หรืออีกชื่อหนึ่งเรียกว่า กระหาง เป็นผีตามความเชื่อของคนไทย เป็นผีผู้ชาย คู่กับผีกระสือ ซึ่งเป็นผู้หญิง เชื่อกันว่าผู้ที่เป็นผีกระหังนั้น จะเป็นผู้ที่เล่นไสยศาสตร์ เมื่ออาคมแกร่งกล้าไม่สามารถควบคุมได้ก็จะเข้าตัว"
 
@@ -49,7 +55,7 @@ with st.sidebar:
 
 
 
-st.header('ระบบจำแนกแวดวงบทความภาษาไทย📙')
+st.header('ระบบจำแนกแวดวงเอกสารภาษาไทย📔🔍')
 
 
 with open("assets/webfonts/font.txt") as f:
@@ -80,21 +86,21 @@ left_col, right_col = st.columns(2)
 with left_col:
     isDataComplete = False
     #Input Method Selection
-    st.subheader("ปรับแต่งข้อมูลนำเข้า⚙️")
+    st.subheader("1. ปรับแต่งข้อมูลนำเข้า⚙️")
     input_option = st.selectbox(
-                    "เลือกช่องทางการรับข้อความ📤",
-                    ("พิมพ์ข้อความ","อัพโหลดไฟล์ .txt"))
+                    "🔸 1.1 เลือกช่องทางการรับข้อความ📝",
+                    ("พิมพ์ข้อความ⌨️","อัพโหลดไฟล์📤 "))
 
     st.info(f'🔹สถานะ: คุณได้เลือก {input_option}')
 
-    if input_option == "พิมพ์ข้อความ":
-        input_text = st.text_area("กรอกข้อความ⌨️",
+    if input_option == "พิมพ์ข้อความ⌨️":
+        input_text = st.text_area("🔸 1.2 กรอกข้อความ⌨️",
                 placeholder,
                 max_chars=5000)
 
     else:
         input_text = None
-        uploaded_file = st.file_uploader("อัพโหลดไฟล์ (นามสกุล txt.)")
+        uploaded_file = st.file_uploader("🔸 1.2 อัพโหลดไฟล์ (นามสกุล txt.)")
         if uploaded_file != None:
             if uploaded_file.type == "text/plain":
                 #st.write("yeh it's text file!")
@@ -108,7 +114,7 @@ with left_col:
 
     #Model Selection     
     model_option = st.selectbox(
-                    "เลือกแบบจำลอง(Model)🤖",
+                    "🔸 1.3 เลือกแบบจำลอง(Model)🤖",
                     ("WangChanBERTa (แนะนำ🔥)","Long short-term memory (LSTM)"))
     if model_option == "WangChanBERTa (แนะนำ🔥)":
         selected_model = "WangChanBERTa"
@@ -134,20 +140,19 @@ with left_col:
 
 
 with right_col: 
-    st.subheader("ผลลัพธ์การประมวลผล 👩🏻‍💻")
+    st.subheader("2. ผลลัพธ์การประมวลผล 👩🏻‍💻")
     if button and isDataComplete:
         
 
         started_load_time = time.time()
         
-        with st.spinner(text='กำลังจัดเตรียมแบบจำลอง⌛️ (อาจใช้เวลาในครั้งแรก)'):
+        with st.spinner(text='กำลังจัดเตรียมแบบจำลอง⌛️ (อาจใช้เวลาในครั้งแรก ไม่เกิน30วินาที)'):
             progress_bar = st.progress(0)
             lstm_model = load_model_lstm()
             progress_bar.progress(30)
             wangchan_model = load_model_wangchan()
             progress_bar.progress(60)
-            if WangChan_PP.is_tokenizer_ready() == False:
-                WangChan_PP.load_wangchan_tokenizer()
+            wangchan_tokenizer = load_wangchan_tokenizer()
             progress_bar.progress(100)
 
         finished_load_time = time.time()
@@ -163,7 +168,7 @@ with right_col:
                 domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text[:1500],lstm_model)
                 predicted_domain = DOMAIN_LIST[domainIndex]
             else:
-                domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text[:1500],wangchan_model)
+                domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text[:1500],wangchan_model,wangchan_tokenizer)
                 predicted_domain = DOMAIN_LIST[domainIndex]
 
             finished_time = time.time()
@@ -182,4 +187,4 @@ with right_col:
             placeholder = input_text
             
     else:
-        st.write("กรุณาปรับแต่งข้อมูลนำเข้าเพื่อประมวลผล")
+        st.write("กรุณาปรับแต่งข้อมูลนำเข้าเพื่อประมวลผล💡")
