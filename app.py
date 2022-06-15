@@ -18,17 +18,17 @@ from assets.module import LSTM_PP
 from assets.module import WangChan_PP
 
 #Load Model and Tokenizer 
-@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=10)
+@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2)
 def load_model_lstm(): return LSTM_PP.load_LSTM()
 
-@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=10)
+@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2)
 def load_model_wangchan(): return WangChan_PP.load_wangchan()
 
 @st.cache(hash_funcs={transformers.models.gpt2.tokenization_gpt2_fast.GPT2TokenizerFast: hash},
                     allow_output_mutation=True,
                     show_spinner=False,
                     ttl=1800,
-                    max_entries=10)
+                    max_entries=2)
 def load_wangchan_tokenizer(): return WangChan_PP.load_wangchan_tokenizer()
 
 #Set up 
