@@ -13,12 +13,13 @@ import transformers
 
 from io import StringIO
 
-from assets.module import LSTM_PP
+#from assets.module import LSTM_PP
 from assets.module import WangChan_PP
 
 #Load Model and Tokenizer 
-@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2,persist=True)
-def load_model_lstm(): return LSTM_PP.load_LSTM()
+
+# @st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2,persist=True)
+# def load_model_lstm(): return LSTM_PP.load_LSTM()
 
 @st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2,persist=True)
 def load_model_wangchan(): return WangChan_PP.load_wangchan()
@@ -29,7 +30,7 @@ def load_model_wangchan(): return WangChan_PP.load_wangchan()
                     ttl=1800,
                     max_entries=2,
                     persist=True)
-                    
+
 def load_wangchan_tokenizer(): return WangChan_PP.load_wangchan_tokenizer()
 
 #Set up 
@@ -118,7 +119,7 @@ with left_col:
     #Model Selection     
     model_option = st.selectbox(
                     "🔸 1.3 เลือกแบบจำลอง(Model)🤖",
-                    ("WangChanBERTa (แนะนำ🔥)","Long short-term memory (LSTM)"))
+                    ("WangChanBERTa (แนะนำ🔥)",))
     if model_option == "WangChanBERTa (แนะนำ🔥)":
         selected_model = "WangChanBERTa"
     else:
@@ -151,7 +152,7 @@ with right_col:
         
         with st.spinner(text='กำลังจัดเตรียมแบบจำลอง⌛️ (อาจใช้เวลาในครั้งแรก ไม่เกิน30วินาที)'):
             progress_bar = st.progress(0)
-            lstm_model = load_model_lstm()
+            #lstm_model = load_model_lstm()
             progress_bar.progress(30)
             wangchan_model = load_model_wangchan()
             progress_bar.progress(60)
@@ -168,8 +169,9 @@ with right_col:
 
             started_time = time.time()
             if selected_model == "Long short-term memory (LSTM)":
-                domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text[:1500],lstm_model)
-                predicted_domain = DOMAIN_LIST[domainIndex]
+                st.write()
+                #domainIndex, domainProb = LSTM_PP.all_preprocessing(input_text[:1500],lstm_model)
+                #predicted_domain = DOMAIN_LIST[domainIndex]
             else:
                 domainIndex, domainProb = WangChan_PP.all_preprocessing(input_text[:1500],wangchan_model,wangchan_tokenizer)
                 predicted_domain = DOMAIN_LIST[domainIndex]
