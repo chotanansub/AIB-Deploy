@@ -1,4 +1,9 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+try:
+    print(transformers.__version__)
+    print('My Note:Transformers!! have been already loaded')
+except:
+    from transformers import AutoTokenizer, AutoModelForSequenceClassification
+    print('My Note: Load Transformers!!')
 
 
 def load_wangchan():

@@ -7,15 +7,11 @@ import time
 
 import random 
 
-
-import transformers
-
-
 from io import StringIO
 
 #from assets.module import LSTM_PP
 from assets.module import WangChan_PP
-
+import transformers
 #Load Model and Tokenizer 
 
 # @st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2,persist=True)
@@ -23,6 +19,7 @@ from assets.module import WangChan_PP
 
 @st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2,persist=True)
 def load_model_wangchan(): return WangChan_PP.load_wangchan()
+
 
 @st.cache(hash_funcs={transformers.models.gpt2.tokenization_gpt2_fast.GPT2TokenizerFast: hash},
                     allow_output_mutation=True,
