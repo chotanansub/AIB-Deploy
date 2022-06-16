@@ -77,8 +77,7 @@ st.markdown(hide_table_index, unsafe_allow_html=True)
 
 
 st.image(book_image)
-#<a href='https://www.freepik.com/photos/library-books'>Library books photo created by jcomp - www.freepik.com</a>
-
+st.write("[Library books photo created by jcomp](https://www.freepik.com/photos/library-books)")
 
 
 
