@@ -17,14 +17,18 @@ import transformers
 # @st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2,persist=True)
 # def load_model_lstm(): return LSTM_PP.load_LSTM()
 
-@st.cache(allow_output_mutation=True,show_spinner=False,ttl=1800,max_entries=2,persist=True)
+@st.cache(allow_output_mutation=True,
+        show_spinner=False,
+        #ttl=24*60*60,
+        max_entries=2,
+        persist=True)
 def load_model_wangchan(): return WangChan_PP.load_wangchan()
 
 
 @st.cache(hash_funcs={transformers.models.gpt2.tokenization_gpt2_fast.GPT2TokenizerFast: hash},
                     allow_output_mutation=True,
                     show_spinner=False,
-                    ttl=1800,
+                    #ttl=24*60*60,
                     max_entries=2,
                     persist=True)
 
@@ -71,8 +75,6 @@ hide_table_index = """
             </style>
             """ 
 st.markdown(hide_table_index, unsafe_allow_html=True)
-
-
 
 
 
