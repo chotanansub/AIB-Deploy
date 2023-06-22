@@ -1,2 +1,2 @@
 # AIB-Deploy
-ai builder project with streamlit app 
+AI Builder project deployed with Streamlit app 
